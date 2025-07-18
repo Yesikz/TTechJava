@@ -1,53 +1,52 @@
 package proyectofinal.controller;
 
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import proyectofinal.entity.*;
-import proyectofinal.service.*;
+import proyectofinal.dto.ProductoDTO;
+import proyectofinal.dto.ProductoResponseDTO;
+import proyectofinal.service.ProductoService;
 
-import java.util.*;
+import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/productos")
 public class ProductoController {
 
-    private ProductoService service;
+    private final ProductoService service;
 
-    public ProductoController(ProductoService productoService){
-        this.service = productoService;
-
+    public ProductoController(ProductoService service) {
+        this.service = service;
     }
 
-    @GetMapping("")
-    List<Producto> listar(){
-        return this.service.listarProductos();
+    @GetMapping
+    public List<ProductoResponseDTO> listar() {
+        return service.listarProductos();
     }
 
-
-    @GetMapping("/buscar")
-    public List<Producto> buscarPorNombre(@RequestParam String nombre) {
-        return service.buscarPorNombre(nombre);
-    }
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<ProductoResponseDTO> buscarPorId(@PathVariable Long id) {
         try {
-            Producto producto = service.buscarProductoPorId(id);
-            return ResponseEntity.ok(producto);
+            return ResponseEntity.ok(service.buscarProductoPorId(id));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/buscar")
+    public List<ProductoResponseDTO> buscarPorNombre(@RequestParam String nombre) {
+        return service.buscarPorNombre(nombre);
+    }
+
     @PostMapping
-    public Producto crear(@RequestBody Producto producto) {
-        return service.guardarProducto(producto);
+    public ProductoResponseDTO crear(@RequestBody ProductoDTO dto) {
+        return service.guardarProducto(dto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Producto> actualizar(@PathVariable Long id, @RequestBody Producto producto) {
+    public ResponseEntity<ProductoResponseDTO> actualizar(@PathVariable Long id, @RequestBody ProductoDTO dto) {
         try {
-            Producto actualizado = service.actualizarProducto(id, producto);
-            return ResponseEntity.ok(actualizado);
+            return ResponseEntity.ok(service.actualizarProducto(id, dto));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -55,12 +54,7 @@ public class ProductoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        try {
-            service.eliminarProducto(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        service.eliminarProducto(id);
+        return ResponseEntity.noContent().build();
     }
-
 }
